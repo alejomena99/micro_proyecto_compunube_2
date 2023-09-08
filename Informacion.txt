@@ -1,0 +1,57 @@
+compunube-alejo-mena -> resource group
+compunubeacr ----> acr
+compunubeaks ----> aks
+
+az group create --location East US --name compunube-alejo-mena
+az acr create --resource-group compunube-alejo-mena --name compunubeacr --sku Basic
+az aks create \
+    --resource-group compunube-alejo-mena \
+    --name compunubeaks \
+    --node-count 2 \
+    --generate-ssh-keys \
+    --attach-acr compunubeacr
+
+az aks update \
+    --resource-group compunube-alejo-mena \
+    --name compunubeaks \
+    --enable-cluster-autoscaler \
+    --min-count 1 \
+    --max-count 3
+
+az aks update \
+  --resource-group compunube-alejo-mena \
+  --name compunubeaks \
+  --disable-cluster-autoscaler
+
+sudo docker login compunubeacr.azurecr.io --username compunubeacr --password (Home/compunube-alejo-mena/compunubeacr/Access keys --> Admin user:enable --> password)
+
+sudo docker build -t kubermatic-dl:latest .
+sudo docker tag kubermatic-dl:latest compunubeacr.azurecr.io/kubermatic-dl:v1.0.0
+sudo docker push compunubeacr.azurecr.io/kubermatic-dl:v1.0.0
+
+az acr repository list --name compunubeacr
+az acr repository show-tags --name compunubeacr --repository kubermatic-dl --output table
+
+az aks get-credentials --resource-group compunube-alejo-mena --name compunubeaks
+
+kubectl apply -f deployment.yaml
+
+kubectl get services
+
+curl -X POST -F img=@horse.jpg http://external-ip:4040/predict (AKS)
+curl -X POST -F img=@dog.jpg http://external-ip:4040/predict (AKS)
+
+//////////////////////////////////////////////////////////////
+https://hub.docker.com/r/inglebard/retroarch-web
+
+sudo docker pull inglebard/retroarch-web
+sudo docker tag inglebard/retroarch-web:latest compunubeacr.azurecr.io/inglebard/retroarch-web:v1.0.0
+sudo docker push compunubeacr.azurecr.io/inglebard/retroarch-web:v1.0.0
+
+kubectl apply -f game-deployment.yaml
+
+kubectl get services
+
+http://external-ip.120:8080
+
+////////////////////////////////////////////////////////////

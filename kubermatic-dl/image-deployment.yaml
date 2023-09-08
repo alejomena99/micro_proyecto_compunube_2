@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubermatic-dl-deployment
+spec:
+  selector:
+    matchLabels:
+      app: kubermatic-dl
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: kubermatic-dl
+    spec:
+      containers:
+      - name: kubermatic-dl
+        image: compunubeacr.azurecr.io/kubermatic-dl:v1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubermatic-dl-service
+spec:
+  selector:
+    app: kubermatic-dl
+  ports:
+  - protocol: TCP
+    port: 4040
+    targetPort: 5000
+  type: LoadBalancer

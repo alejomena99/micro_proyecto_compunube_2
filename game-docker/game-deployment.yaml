@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retroarch-web-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: retroarch-web
+  template:
+    metadata:
+      labels:
+        app: retroarch-web
+    spec:
+      containers:
+      - name: retroarch-web
+        image: compunubeacr.azurecr.io/inglebard/retroarch-web:v1.0.0
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: retroarch-web-service
+spec:
+  selector:
+    app: retroarch-web
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 80
+  type: LoadBalancer
